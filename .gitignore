@@ -90,5 +90,4 @@ ENV/
 
 # Project specific folders
 archive/
-dataset/detectorData/
-dataset/recognizerData/
+dataset/
