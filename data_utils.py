@@ -9,19 +9,18 @@ try:
 except:
   import pickle
 
-import pandas as pd
 import numpy as np
 import scipy.misc
 
 class Data:
 
   # TODO: preprocess data after loading
-  def load_from_image(self, prefix):
+  def load_images(self, prefix):
     train_label_path  = os.path.join(prefix, 'trainLabels.csv')
     test_label_path   = os.path.join(prefix, 'testLabels.csv')
 
-    self.all_y_train = pd.read_csv(train_label_path, header=None, index_col=0)
-    self.y_test  = pd.read_csv(test_label_path, header=None, index_col=0)
+    self.all_y_train = np.genfromtxt(train_label_path, delimiter=',', usecols=1, dtype=np.uint8)
+    self.y_test  = np.genfromtxt(test_label_path, delimiter=',', usecols=1, dtype=np.uint8)
 
     N_all_train = self.all_y_train.size
     N_test  = self.y_test.size
@@ -31,7 +30,7 @@ class Data:
     for i in xrange(1, N_all_train + 1):
       img_path = os.path.join(prefix, 'train', str(i) + '.png')
       I = scipy.misc.imread(img_path, flatten=True)
-      all_X_train.append(I.reshape((1, -1)))
+      all_X_train.append(I.ravel())
     print('Finished loading train set')
 
     self.all_X_train = np.array(all_X_train)
@@ -43,7 +42,7 @@ class Data:
     for i in xrange(1, N_test + 1):
       img_path = os.path.join(prefix, 'test', str(i) + '.png')
       I = scipy.misc.imread(img_path, flatten=True)
-      X_test.append(I.reshape((1, -1)))
+      X_test.append(I.ravel())
     print('Finished loading test set')
 
     self.X_test = np.array(X_test)
