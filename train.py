@@ -24,8 +24,8 @@ def train(model, data):
                                                     IMAGE_SIZE))
   y_placeholder = tf.placeholder(tf.int32, shape=(None,))
 
-  logits   = model.inference(X_placeholder)
-  loss_op  = model.loss(logits, y_placeholder)
+  logits, l2_reg = model.inference(X_placeholder)
+  loss_op  = model.loss(logits, y_placeholder, l2_reg)
   train_op = model.training(loss_op, FLAGS.lr)
   eval_correct = model.evaluation(logits, y_placeholder)
 

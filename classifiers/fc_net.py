@@ -5,7 +5,7 @@ from model import Model
 class FullyConnectedNet(Model):
 
   def __init__(self, input_dims, hidden_dims, num_classes,
-               reg=0.0, weight_scale=1e-3):
+               reg=0.03, weight_scale=1e-3):
     self.input_dims = input_dims
     self.hidden_dims = hidden_dims
     self.num_classes = num_classes
@@ -24,6 +24,7 @@ class FullyConnectedNet(Model):
       biases = tf.Variable(tf.zeros([self.hidden_dims[0]]),
                          name='biases')
       hidden1 = tf.nn.relu(tf.matmul(input_data, weights) + biases)
+      l2_reg  = tf.nn.l2_loss(weights)
 
     # Hidden layer from 2 -> number of layers - 1
     prev_hidden = hidden1
@@ -37,6 +38,8 @@ class FullyConnectedNet(Model):
         biases = tf.Variable(tf.zeros([self.hidden_dims[l - 1]]),
                            name='biases')
         hidden = tf.nn.relu(tf.matmul(prev_hidden, weights) + biases)
+
+        l2_reg  = l2_reg + tf.nn.l2_loss(weights)
         prev_hidden = hidden
 
     # Softmax layer
@@ -45,17 +48,23 @@ class FullyConnectedNet(Model):
         tf.truncated_normal([self.hidden_dims[-1], self.num_classes],
                             stddev=self.weight_scale), # Use 1 / sqrt(input_dims)?
         name='weights')
-      biases = tf.Variable(tf.zeros([self.num_classes]),
-                         name='biases')
+      biases = tf.Variable(tf.zeros([self.num_classes]), name='biases')
       logits = tf.matmul(prev_hidden, weights) + biases
-    return logits
 
-  def loss(self, logits, labels):
+      l2_reg  = l2_reg + tf.nn.l2_loss(weights)
+
+    return logits, l2_reg
+
+  def loss(self, logits, labels, l2_reg=None):
     # required for sparse_softmax_cross_entropy_with_logits
     labels = tf.to_int32(labels)
     cross_entropy = tf.nn.sparse_softmax_cross_entropy_with_logits(
       labels=labels, logits=logits, name='xentropy')
-    return tf.reduce_mean(cross_entropy, name='xentropy_mean')
+
+    if l2_reg is not None:
+      return tf.reduce_mean(cross_entropy + self.reg * l2_reg)
+    else:
+      return tf.reduce_mean(cross_entropy, name='xentropy_mean')
 
   def training(self, loss, learning_rate):
     optimizer = tf.train.AdagradOptimizer(learning_rate)
