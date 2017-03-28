@@ -12,15 +12,20 @@ except:
 import numpy as np
 import scipy.misc
 
-class Data:
+class ImageDataset:
+
+  def __init__(self, location_prefix):
+    self._load_images(location_prefix)
 
   # TODO: preprocess data after loading
-  def load_images(self, prefix):
+  def _load_images(self, prefix):
     train_label_path  = os.path.join(prefix, 'trainLabels.csv')
     test_label_path   = os.path.join(prefix, 'testLabels.csv')
 
-    self.all_y_train = np.genfromtxt(train_label_path, delimiter=',', usecols=1, dtype=np.uint8)
-    self.y_test  = np.genfromtxt(test_label_path, delimiter=',', usecols=1, dtype=np.uint8)
+    self.all_y_train = np.genfromtxt(train_label_path, delimiter=',', usecols=1, dtype=np.int32)
+    self.y_test  = np.genfromtxt(test_label_path, delimiter=',', usecols=1, dtype=np.int32)
+    self.all_y_train -= 1
+    self.y_test -= 1
 
     N_all_train = self.all_y_train.size
     N_test  = self.y_test.size
@@ -70,15 +75,25 @@ class Data:
     self._split_train_val()
 
   def _split_train_val(self):
-    train_val_split = int(self.all_y_train.size * 0.8)
+    perm = np.arange(self.all_X_train.shape[0])
+    np.random.shuffle(perm)
+    self.all_X_train = self.all_X_train[perm]
+    self.all_y_train = self.all_y_train[perm]
+
+    train_val_split = int(self.all_y_train.size * 0.85)
     self.X_train = self.all_X_train[:train_val_split]
-    self.X_val   = self.all_X_train[train_val_split:]
     self.y_train = self.all_y_train[:train_val_split]
+    self.X_val   = self.all_X_train[train_val_split:]
     self.y_val   = self.all_y_train[train_val_split:]
 
+  def _shuffle_train(self):
+    perm = np.arange(self.X_train.shape[0])
+    np.random.shuffle(perm)
+    self.X_train = self.X_train[perm]
+    self.y_train = self.y_train[perm]
+
   def train_batches(self, batch_size):
-    for start in xrange(0, self.X_train.size, batch_size):
+    self._shuffle_train()
+    for start in xrange(0, self.X_train.shape[0], batch_size):
       yield ( self.X_train[start: start + batch_size],
               self.y_train[start: start + batch_size])
-
-
