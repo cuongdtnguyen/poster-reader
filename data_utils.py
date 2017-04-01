@@ -24,11 +24,15 @@ class ImageDataset:
 
     self.all_y_train = np.genfromtxt(train_label_path, delimiter=',', usecols=1, dtype=np.int32)
     self.y_test  = np.genfromtxt(test_label_path, delimiter=',', usecols=1, dtype=np.int32)
-    self.all_y_train -= 1
-    self.y_test -= 1
 
-    N_all_train = self.all_y_train.size
-    N_test  = self.y_test.size
+    # Encode as one-hot vectors
+    num_label = np.max(self.all_y_train)
+
+    self.all_y_train = np.eye(num_label)[self.all_y_train - 1]
+    self.y_test = np.eye(num_label)[self.y_test - 1]
+
+    N_all_train = self.all_y_train.shape[0]
+    N_test  = self.y_test.shape[0]
 
     print('Loading train set...')
     all_X_train = []
@@ -80,7 +84,7 @@ class ImageDataset:
     self.all_X_train = self.all_X_train[perm]
     self.all_y_train = self.all_y_train[perm]
 
-    train_val_split = int(self.all_y_train.size * 0.85)
+    train_val_split = int(self.all_y_train.shape[0] * 0.85)
     self.X_train = self.all_X_train[:train_val_split]
     self.y_train = self.all_y_train[:train_val_split]
     self.X_val   = self.all_X_train[train_val_split:]

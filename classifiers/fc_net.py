@@ -5,7 +5,7 @@ from model import Model
 class FullyConnectedNet(Model):
 
   def __init__(self, input_dims, hidden_dims, num_classes,
-               reg=0.03, weight_scale=1e-3):
+               reg=0.00, weight_scale=1e-3):
     self.input_dims = input_dims
     self.hidden_dims = hidden_dims
     self.num_classes = num_classes
@@ -56,9 +56,7 @@ class FullyConnectedNet(Model):
     return logits, l2_reg
 
   def loss(self, logits, labels, l2_reg=None):
-    # required for sparse_softmax_cross_entropy_with_logits
-    labels = tf.to_int32(labels)
-    cross_entropy = tf.nn.sparse_softmax_cross_entropy_with_logits(
+    cross_entropy = tf.nn.softmax_cross_entropy_with_logits(
       labels=labels, logits=logits, name='xentropy')
 
     if l2_reg is not None:
@@ -72,8 +70,8 @@ class FullyConnectedNet(Model):
     return train_op
 
   def evaluation(self, logits, labels):
-    correct = tf.nn.in_top_k(logits, labels, 1)
-    return tf.reduce_sum(tf.cast(correct, tf.int32))
+    correct = tf.equal(tf.argmax(logits, axis=1), tf.argmax(labels, axis=1))
+    return tf.reduce_mean(tf.cast(correct, tf.float32))
 
 
 
