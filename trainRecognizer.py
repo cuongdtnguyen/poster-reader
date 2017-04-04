@@ -19,13 +19,13 @@ tf.app.flags.DEFINE_integer('log_freq', 5, 'Log frequency every number of epochs
 tf.app.flags.DEFINE_float('reg', 0.00, 'Regularization')
 tf.app.flags.DEFINE_string('save_path', 'recognizerModel/recognizerModel.ckpt', 'Path to file that this model will be saved to')
 
-character_codes = range(ord('0'),ord('9')+1) + range(ord('A'),ord('Z')+1) + range(ord('a'),ord('z')+1)
+CHARACTER_CODES = range(ord('0'),ord('9')+1) + range(ord('A'),ord('Z')+1) + range(ord('a'),ord('z')+1)
 
 def convert_to_index(a):
-  return map(lambda c : character_codes.index(c), a)
+  return map(lambda c : CHARACTER_CODES.index(c), a)
 
 def convert_to_code(a):
-  return map(lambda i : character_codes[i], a)
+  return map(lambda i : CHARACTER_CODES[i], a)
 
 def main(argv=None):
   data = ImageDataset('dataset/recognizerData')
@@ -37,8 +37,7 @@ def main(argv=None):
   data.y_train = convert_to_index(data.y_train)
   data.y_val = convert_to_index(data.y_val)
   data.y_test = convert_to_index(data.y_test)
-
-  num_label = np.max(data.all_y_train) + 1
+  num_label = len(CHARACTER_CODES)
   data.y_train = to_one_hot(data.y_train, num_label)
   data.y_val = to_one_hot(data.y_val, num_label)
   data.y_test = to_one_hot(data.y_test, num_label)
