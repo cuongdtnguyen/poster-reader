@@ -19,6 +19,7 @@ tf.app.flags.DEFINE_boolean('verbose', True, 'Verbose')
 tf.app.flags.DEFINE_float('lr', 0.001, 'Learning rate')
 tf.app.flags.DEFINE_integer('log_freq', 5, 'Log frequency every number of epochs')
 tf.app.flags.DEFINE_float('reg', 0.00, 'Regularization')
+tf.app.flags.DEFINE_string('save_path', 'recognizerModel/recognizerModel.ckpt', 'Path to file that this model will be saved to')
 
 character_codes = range(ord('0'),ord('9')+1) + range(ord('A'),ord('Z')+1) + range(ord('a'),ord('z')+1)
 
@@ -50,7 +51,8 @@ def main(argv=None):
     batch_size=FLAGS.batch_size,
     learning_rate=FLAGS.lr,
     log_freq=FLAGS.log_freq,
-    verbose=FLAGS.verbose)
+    verbose=FLAGS.verbose,
+    save_path=FLAGS.save_path)
 
 if __name__=='__main__':
   tf.app.run()
