@@ -19,7 +19,7 @@ class FullyConnectedNet(Model):
     with tf.name_scope('hidden1'):
       weights = tf.Variable(
         tf.truncated_normal([self.input_dims, self.hidden_dims[0]],
-                            stddev=self.weight_scale), # Use 1 / sqrt(input_dims)?
+                            stddev=self.weight_scale),
         name='weights')
       biases = tf.Variable(tf.zeros([self.hidden_dims[0]]),
                          name='biases')
@@ -28,12 +28,12 @@ class FullyConnectedNet(Model):
 
     # Hidden layer from 2 -> number of layers - 1
     prev_hidden = hidden1
-    for l in range(2, num_layers - 1):
+    for l in range(2, num_layers):
 
       with tf.name_scope('hidden' + str(l)):
         weights = tf.Variable(
         tf.truncated_normal([self.hidden_dims[l - 2], self.hidden_dims[l - 1]],
-                            stddev=self.weight_scale), # Use 1 / sqrt(hidden_dims[l - 2]?
+                            stddev=self.weight_scale),
         name='weights')
         biases = tf.Variable(tf.zeros([self.hidden_dims[l - 1]]),
                            name='biases')
@@ -46,7 +46,7 @@ class FullyConnectedNet(Model):
     with tf.name_scope('softmax_linear'):
       weights = tf.Variable(
         tf.truncated_normal([self.hidden_dims[-1], self.num_classes],
-                            stddev=self.weight_scale), # Use 1 / sqrt(input_dims)?
+                            stddev=self.weight_scale),
         name='weights')
       biases = tf.Variable(tf.zeros([self.num_classes]), name='biases')
       logits = tf.matmul(prev_hidden, weights) + biases
@@ -60,19 +60,19 @@ class FullyConnectedNet(Model):
       labels=labels, logits=logits, name='xentropy')
 
     if l2_reg is not None:
-      return tf.reduce_mean(cross_entropy + self.reg * l2_reg)
+      return tf.reduce_mean(cross_entropy + self.reg * l2_reg, name='xentropy_mean_reg')
     else:
       return tf.reduce_mean(cross_entropy, name='xentropy_mean')
 
   def training(self, loss, learning_rate):
-    # optimizer = tf.train.GradientDescentOptimizer(learning_rate)
+    tf.summary.scalar('loss', loss)
     optimizer = tf.train.AdagradOptimizer(learning_rate)
     train_op = optimizer.minimize(loss)
     return train_op
 
   def evaluation(self, logits, labels):
     correct = tf.equal(tf.argmax(logits, axis=1), tf.argmax(labels, axis=1))
-    return tf.reduce_mean(tf.cast(correct, tf.float32))
+    return tf.reduce_mean(tf.cast(correct, tf.float32), name='evaluation')
 
 
 
