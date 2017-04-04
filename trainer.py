@@ -8,7 +8,6 @@ import os
 from data_utils import ImageDataset
 from classifiers import *
 
-
 def train(model, data, num_epochs, batch_size, learning_rate, log_freq, verbose, save_path):
 
   num_dimension = data.X_train.shape[1]
@@ -22,11 +21,15 @@ def train(model, data, num_epochs, batch_size, learning_rate, log_freq, verbose,
   train_op = model.training(loss_op, learning_rate)
   eval_correct = model.evaluation(logits, y_placeholder)
 
+  summary = tf.summary.merge_all()
+
   init = tf.global_variables_initializer()
 
   saver = tf.train.Saver()
 
   with tf.Session() as sess:
+    summary_writer = tf.summary.FileWriter(os.path.dirname(save_path), sess.graph)
+
     sess.run(init)
 
     for epoch in range(num_epochs):
@@ -44,6 +47,10 @@ def train(model, data, num_epochs, batch_size, learning_rate, log_freq, verbose,
 
         print('(Epoch %d/%d). Train loss: %f. Train acc: %f; Val acc: %f' % (
           epoch, num_epochs, train_loss, train_acc, val_acc))
+
+        summary_str = sess.run(summary, feed_dict={ X_placeholder: X_batch, y_placeholder: y_batch })
+        summary_writer.add_summary(summary_str, epoch)
+        summary_writer.flush()
 
     if not os.path.exists(os.path.dirname(save_path)):
         os.makedirs(os.path.dirname(save_path))

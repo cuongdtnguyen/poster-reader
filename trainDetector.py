@@ -4,12 +4,11 @@ from __future__ import print_function
 
 import tensorflow as tf
 import numpy as np
+import os
 
 from data_utils import *
 from classifiers import *
 from trainer import *
-
-IMAGE_SIZE = 32 * 32
 
 FLAGS = tf.app.flags.FLAGS
 
@@ -22,7 +21,10 @@ tf.app.flags.DEFINE_string('save_path', 'detectorModel/detectorModel.ckpt', 'Pat
 
 def main(argv=None):
   data = ImageDataset('dataset/detectorData')
+  data.save_normalize(os.path.join(os.path.dirname(FLAGS.save_path),
+                                   'normalization.pickle'))
 
+  # Zero-based index for labels
   data.y_train -= 1
   data.y_val   -= 1
   data.y_test  -= 1

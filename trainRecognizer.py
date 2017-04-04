@@ -9,8 +9,6 @@ from data_utils import *
 from classifiers import *
 from trainer import *
 
-IMAGE_SIZE = 32 * 32
-
 FLAGS = tf.app.flags.FLAGS
 
 tf.app.flags.DEFINE_integer('num_epochs', 50, 'Number of epoch')

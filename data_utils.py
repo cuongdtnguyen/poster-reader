@@ -12,12 +12,26 @@ except:
 import numpy as np
 import scipy.misc
 
+IMAGE_SIZE = 32
+
 def to_one_hot(y, num_label):
   return np.eye(num_label)[y]
+
+def load_image(path, preprocess=False, normalize=None):
+  img = scipy.misc.imread(path, flatten=True)
+  if preprocess:
+    img = scipy.misc.imresize(img, (IMAGE_SIZE, IMAGE_SIZE), interp='bilinear')
+  if normalize is not None:
+    mean, std = normalize
+    img = ((img.ravel() - mean)/std).reshape(img.shape)
+
+  return img
 
 class ImageDataset:
 
   def __init__(self, location_prefix):
+    self.mean_train = None
+    self.std_train  = None
     self._load_images(location_prefix)
 
   # TODO: preprocess data after loading
@@ -35,7 +49,7 @@ class ImageDataset:
     all_X_train = []
     for i in xrange(1, N_all_train + 1):
       img_path = os.path.join(prefix, 'train', str(i) + '.png')
-      I = scipy.misc.imread(img_path, flatten=True)
+      I = load_image(img_path)
       all_X_train.append(I.ravel())
     print('Finished loading train set')
 
@@ -47,11 +61,15 @@ class ImageDataset:
     X_test = []
     for i in xrange(1, N_test + 1):
       img_path = os.path.join(prefix, 'test', str(i) + '.png')
-      I = scipy.misc.imread(img_path, flatten=True)
+      I = load_image(img_path)
       X_test.append(I.ravel())
     print('Finished loading test set')
 
     self.X_test = np.array(X_test)
+
+    self.X_train = self.normalize(self.X_train)
+    self.X_val   = self.normalize(self.X_val)
+    self.X_test  = self.normalize(self.X_test)
 
   def pickle(self, prefix):
     with open(os.path.join(prefix, 'X_train.pickle'), 'wb') as f:
@@ -87,11 +105,24 @@ class ImageDataset:
     self.X_val   = self.all_X_train[train_val_split:]
     self.y_val   = self.all_y_train[train_val_split:]
 
+    self.mean_train = np.mean(self.X_train, axis=0)
+    self.std_train  = np.std(self.X_train, axis=0)
+
   def _shuffle_train(self):
     perm = np.arange(self.X_train.shape[0])
     np.random.shuffle(perm)
     self.X_train = self.X_train[perm]
     self.y_train = self.y_train[perm]
+
+  def normalize(self, sample):
+    if self.mean_train is not None:
+      return (sample - self.mean_train) / self.std_train
+    return sample
+
+  def save_normalize(self, path):
+    if self.mean_train is not None:
+      with open(path, 'wb') as f:
+        pickle.dump((self.mean_train, self.std_train), f)
 
   def train_batches(self, batch_size):
     self._shuffle_train()
