@@ -22,6 +22,8 @@ tf.app.flags.DEFINE_string('save_path', 'detectorModel/detectorModel.ckpt', 'Pat
 
 def main(argv=None):
   data = ImageDataset('dataset/detectorData')
+
+  # Save normalization values so that predictor can use later
   data.save_normalize(os.path.join(os.path.dirname(FLAGS.save_path),
                                    'normalization.pickle'))
 

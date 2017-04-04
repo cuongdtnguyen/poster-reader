@@ -60,7 +60,8 @@ class FullyConnectedNet(Model):
       labels=labels, logits=logits, name='xentropy')
 
     if l2_reg is not None:
-      return tf.reduce_mean(cross_entropy + self.reg * l2_reg, name='xentropy_mean_reg')
+      return tf.reduce_mean(cross_entropy + self.reg * l2_reg,
+                            name='xentropy_mean_reg')
     else:
       return tf.reduce_mean(cross_entropy, name='xentropy_mean')
 

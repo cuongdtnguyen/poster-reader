@@ -29,9 +29,10 @@ def convert_to_code(a):
 
 def main(argv=None):
   data = ImageDataset('dataset/recognizerData')
+
+  # Save normalization values so that predictor can use later
   data.save_normalize(os.path.join(os.path.dirname(FLAGS.save_path),
                                  'normalization.pickle'))
-
 
   data.y_train = convert_to_index(data.y_train)
   data.y_val = convert_to_index(data.y_val)
