@@ -13,6 +13,7 @@ import numpy as np
 import scipy.misc
 
 IMAGE_SIZE = 32
+TRAIN_VAL_RATIO = 0.85
 
 def to_one_hot(y, num_label):
   return np.eye(num_label)[y]
@@ -34,7 +35,6 @@ class ImageDataset:
     self.std_train  = None
     self._load_images(location_prefix)
 
-  # TODO: preprocess data after loading
   def _load_images(self, prefix):
     train_label_path  = os.path.join(prefix, 'trainLabels.csv')
     test_label_path   = os.path.join(prefix, 'testLabels.csv')
@@ -99,7 +99,7 @@ class ImageDataset:
     self.all_X_train = self.all_X_train[perm]
     self.all_y_train = self.all_y_train[perm]
 
-    train_val_split = int(self.all_y_train.shape[0] * 0.85)
+    train_val_split = int(self.all_y_train.shape[0] * TRAIN_VAL_RATIO)
     self.X_train = self.all_X_train[:train_val_split]
     self.y_train = self.all_y_train[:train_val_split]
     self.X_val   = self.all_X_train[train_val_split:]

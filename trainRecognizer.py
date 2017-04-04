@@ -14,7 +14,7 @@ FLAGS = tf.app.flags.FLAGS
 tf.app.flags.DEFINE_integer('num_epochs', 50, 'Number of epoch')
 tf.app.flags.DEFINE_integer('batch_size', 100, 'Batch size')
 tf.app.flags.DEFINE_boolean('verbose', True, 'Verbose')
-tf.app.flags.DEFINE_float('lr', 0.001, 'Learning rate')
+tf.app.flags.DEFINE_float('lr', 0.05, 'Learning rate')
 tf.app.flags.DEFINE_integer('log_freq', 5, 'Log frequency every number of epochs')
 tf.app.flags.DEFINE_float('reg', 0.00, 'Regularization')
 tf.app.flags.DEFINE_string('save_path', 'recognizerModel/recognizerModel.ckpt', 'Path to file that this model will be saved to')
@@ -29,6 +29,9 @@ def convert_to_code(a):
 
 def main(argv=None):
   data = ImageDataset('dataset/recognizerData')
+  data.save_normalize(os.path.join(os.path.dirname(FLAGS.save_path),
+                                 'normalization.pickle'))
+
 
   data.y_train = convert_to_index(data.y_train)
   data.y_val = convert_to_index(data.y_val)
