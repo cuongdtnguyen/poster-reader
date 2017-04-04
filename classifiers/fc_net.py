@@ -65,6 +65,7 @@ class FullyConnectedNet(Model):
       return tf.reduce_mean(cross_entropy, name='xentropy_mean')
 
   def training(self, loss, learning_rate):
+    # optimizer = tf.train.GradientDescentOptimizer(learning_rate)
     optimizer = tf.train.AdagradOptimizer(learning_rate)
     train_op = optimizer.minimize(loss)
     return train_op

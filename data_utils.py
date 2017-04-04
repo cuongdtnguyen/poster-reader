@@ -12,6 +12,9 @@ except:
 import numpy as np
 import scipy.misc
 
+def to_one_hot(y, num_label):
+  return np.eye(num_label)[y]
+
 class ImageDataset:
 
   def __init__(self, location_prefix):
@@ -24,12 +27,6 @@ class ImageDataset:
 
     self.all_y_train = np.genfromtxt(train_label_path, delimiter=',', usecols=1, dtype=np.int32)
     self.y_test  = np.genfromtxt(test_label_path, delimiter=',', usecols=1, dtype=np.int32)
-
-    # Encode as one-hot vectors
-    num_label = np.max(self.all_y_train)
-
-    self.all_y_train = np.eye(num_label)[self.all_y_train - 1]
-    self.y_test = np.eye(num_label)[self.y_test - 1]
 
     N_all_train = self.all_y_train.shape[0]
     N_test  = self.y_test.shape[0]
