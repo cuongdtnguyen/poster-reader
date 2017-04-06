@@ -7,8 +7,6 @@ import convolu_net
 from data_utils import ImageDataset
 from classifiers import *
 
-
-
 def train(model, data, num_epochs, batch_size, learning_rate, log_freq, verbose):
 
   num_dimension = data.X_train.shape[1]
