@@ -3,9 +3,10 @@ from __future__ import division
 from __future__ import print_function
 
 import tensorflow as tf
-
+import convolu_net
 from data_utils import ImageDataset
 from classifiers import *
+
 
 
 def train(model, data, num_epochs, batch_size, learning_rate, log_freq, verbose):
@@ -38,8 +39,6 @@ def train(model, data, num_epochs, batch_size, learning_rate, log_freq, verbose)
   }
   # logits, l2_reg = model.inference(X_placeholder)
   logits_, l2_reg = convolu_net.conv_net(X_placeholder, weights, biases, keep_prob)
-  # print(logits)
-  # print(logits_)
   loss_op  = model.loss(logits_, y_placeholder, l2_reg)
   train_op = model.training(loss_op, learning_rate)
   eval_correct = model.evaluation(logits_, y_placeholder)
