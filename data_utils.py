@@ -196,6 +196,8 @@ class ImageDataset:
 
     """
     if self.mean_train is not None:
+      if not os.path.exists(os.path.dirname(path)):
+        os.makedirs(os.path.dirname(path))
       with open(path, 'wb') as f:
         pickle.dump((self.mean_train, self.std_train), f)
 

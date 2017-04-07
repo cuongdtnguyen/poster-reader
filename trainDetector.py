@@ -38,10 +38,12 @@ def main(argv=None):
   data.y_val = to_one_hot(data.y_val, num_label)
   data.y_test = to_one_hot(data.y_test, num_label)
 
-  model = FullyConnectedNet(data.X_train.shape[1],
-                            [100, 100],
-                            data.y_train.shape[1],
-                            reg=FLAGS.reg)
+  # model = FullyConnectedNet(data.X_train.shape[1],
+  #                           [100, 100],
+  #                           data.y_train.shape[1],
+  #                           reg=FLAGS.reg)
+
+  model = ConvNet((32, 32), 2)
 
   train(model, data,
     num_epochs=FLAGS.num_epochs,
