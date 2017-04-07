@@ -21,7 +21,11 @@ tf.app.flags.DEFINE_float('reg', 0.00, 'Regularization')
 tf.app.flags.DEFINE_string('save_path', 'recognizerModel/recognizerModel.ckpt',
                            'Path to file that this model will be saved to')
 
-CHARACTER_CODES = range(ord('0'),ord('9')+1) + range(ord('A'),ord('Z')+1) + range(ord('a'),ord('z')+1)
+# CHARACTER_CODES = range(ord('0'),ord('9')+1) + range(ord('A'),ord('Z')+1) + range(ord('a'),ord('z')+1)
+CHARACTER_CODES = range(ord('0'),ord('9')+1) + range(ord('a'),ord('z')+1)
+
+def uncapitalize(a):
+  return map(lambda c : ord(chr(c).lower()), a)
 
 def convert_to_index(a):
   return map(lambda c : CHARACTER_CODES.index(c), a)
@@ -36,9 +40,9 @@ def main(argv=None):
   data.save_normalize(os.path.join(os.path.dirname(FLAGS.save_path),
                                  'normalization.pickle'))
 
-  data.y_train = convert_to_index(data.y_train)
-  data.y_val = convert_to_index(data.y_val)
-  data.y_test = convert_to_index(data.y_test)
+  data.y_train = convert_to_index(uncapitalize(data.y_train))
+  data.y_val = convert_to_index(uncapitalize(data.y_val))
+  data.y_test = convert_to_index(uncapitalize(data.y_test))
   num_label = len(CHARACTER_CODES)
   data.y_train = to_one_hot(data.y_train, num_label)
   data.y_val = to_one_hot(data.y_val, num_label)

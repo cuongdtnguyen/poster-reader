@@ -49,6 +49,8 @@ def train(model, data, num_epochs, batch_size, learning_rate, log_freq, verbose,
 
     sess.run(init)
     step = 0
+    if verbose:
+      print('Start training...')
     for epoch in range(num_epochs):
 
       for X_batch, y_batch in data.train_batches(batch_size):
@@ -71,9 +73,9 @@ def train(model, data, num_epochs, batch_size, learning_rate, log_freq, verbose,
                            feed_dict={ X_placeholder: data.X_val,
                                        y_placeholder: data.y_val,
                                        keep_prob: 1.0 })
-
-        print('(Epoch %d/%d). Train loss: %f. Train acc: %f. Val acc: %f' % (
-          epoch, num_epochs, train_loss, train_acc, val_acc))
+        if verbose:
+          print('(Epoch %d/%d). Train loss: %f. Train acc: %f. Val acc: %f' % (
+            epoch + 1, num_epochs, train_loss, train_acc, val_acc))
 
         # Output summary
         # summary_str = sess.run(summary, feed_dict={ X_placeholder: X_batch,
