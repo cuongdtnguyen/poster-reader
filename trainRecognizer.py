@@ -53,7 +53,8 @@ def main(argv=None):
   #                           data.y_train.shape[1],
   #                           reg=FLAGS.reg)
 
-  model = ConvNet((32, 32), len(CHARACTER_CODES))
+  #model = ConvNet((32, 32), len(CHARACTER_CODES))
+  model = ConvNet2((32, 32), len(CHARACTER_CODES))
   train(model, data,
     num_epochs=FLAGS.num_epochs,
     batch_size=FLAGS.batch_size,
