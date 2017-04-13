@@ -14,6 +14,7 @@ FLAGS = tf.app.flags.FLAGS
 
 tf.app.flags.DEFINE_integer('num_epochs', 50, 'Number of epoch')
 tf.app.flags.DEFINE_integer('batch_size', 100, 'Batch size')
+tf.app.flags.DEFINE_integer('val_batch_size', 500, 'Batch size for validation')
 tf.app.flags.DEFINE_boolean('verbose', True, 'Verbose')
 tf.app.flags.DEFINE_float('lr', 0.05, 'Learning rate')
 tf.app.flags.DEFINE_integer('log_freq', 5, 'Log frequency every number of epochs')
@@ -48,6 +49,7 @@ def main(argv=None):
   train(model, data,
     num_epochs=FLAGS.num_epochs,
     batch_size=FLAGS.batch_size,
+    val_batch_size=FLAGS.val_batch_size,
     learning_rate=FLAGS.lr,
     log_freq=FLAGS.log_freq,
     verbose=FLAGS.verbose,

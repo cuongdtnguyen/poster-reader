@@ -9,8 +9,8 @@ from data_utils import ImageDataset
 from classifiers import *
 
 
-def train(model, data, num_epochs, batch_size, learning_rate, log_freq, verbose,
-          save_path):
+def train(model, data, num_epochs, batch_size, val_batch_size, learning_rate,
+          log_freq, verbose, save_path):
   """Trains a model with given data
   Args:
     model:          a TensorFlow op that represents a model
@@ -60,22 +60,30 @@ def train(model, data, num_epochs, batch_size, learning_rate, log_freq, verbose,
                                        y_placeholder: y_batch,
                                        keep_prob: 0.5 })
 
-      if epoch % log_freq == 0 or epoch == num_epochs - 1:
         train_loss = sess.run(loss_op,
-                              feed_dict={ X_placeholder: data.X_train,
-                                          y_placeholder: data.y_train,
+                              feed_dict={ X_placeholder: X_batch,
+                                          y_placeholder: y_batch,
                                           keep_prob: 1.0})
         train_acc = sess.run(eval_correct,
-                             feed_dict={ X_placeholder: data.X_train,
-                                         y_placeholder: data.y_train,
+                             feed_dict={ X_placeholder: X_batch,
+                                         y_placeholder: y_batch,
                                          keep_prob: 1.0 })
-        val_acc = sess.run(eval_correct,
-                           feed_dict={ X_placeholder: data.X_val,
-                                       y_placeholder: data.y_val,
-                                       keep_prob: 1.0 })
-        if verbose:
-          print('(Epoch %d/%d). Train loss: %f. Train acc: %f. Val acc: %f' % (
-            epoch + 1, num_epochs, train_loss, train_acc, val_acc))
+
+        if verbose and step % log_freq == 0:
+          print('Step %d. Train loss: %f. Train acc: %f' % (step, train_loss, train_acc))
+
+
+      sum_val_acc = 0
+      num_val_batches = 0
+      for X_batch, y_batch in data.val_batches(val_batch_size):
+        num_val_batches += 1
+        sum_val_acc += sess.run(eval_correct,
+                                feed_dict={ X_placeholder: X_batch,
+                                            y_placeholder: y_batch,
+                                            keep_prob: 1.0 })
+      val_acc = sum_val_acc / num_val_batches
+      print('Epoch %d/%d. Validation accuracy: %f' % (
+        epoch + 1, num_epochs, val_acc))
 
         # Output summary
         # summary_str = sess.run(summary, feed_dict={ X_placeholder: X_batch,

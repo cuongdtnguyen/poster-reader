@@ -212,3 +212,8 @@ class ImageDataset:
     for start in xrange(0, self.X_train.shape[0], batch_size):
       yield ( self.X_train[start: start + batch_size],
               self.y_train[start: start + batch_size])
+
+  def val_batches(self, batch_size):
+    for start in xrange(0, self.X_val.shape[0], batch_size):
+      yield ( self.X_val[start: start + batch_size],
+              self.y_val[start: start + batch_size])
