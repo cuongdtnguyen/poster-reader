@@ -13,7 +13,6 @@ boxes=[]
 master = Tk()
 startx,starty=0,0
 rec=0
-recs=[]
 mainCanvas = Canvas(master,width=600,height=600)
 photo=Image.new("RGB",(1000,1000),"white")
 album=[]
@@ -30,12 +29,10 @@ def mouseMotion(event):
 	global box, boxes, rec
 	mainCanvas.delete(rec)
 	rec=mainCanvas.create_rectangle(startx,starty,event.x,event.y)
-	rec_coor = [startx,starty,event.x,event.y]
-	recs.append(rec_coor)
 	return
 
 def mouseRelease(event):
-	global box, boxes, rec,recs, counter
+	global box, boxes, counter
 	box[2],box[3]=event.x,event.y
 	boxes.append(box)
 	mainCanvas.create_rectangle(boxes[counter][0],boxes[counter][1],
@@ -77,6 +74,7 @@ def binding(filename):
 	master.bind('<Key>',keyDown)
 	mainCanvas.pack(expand="yes")
 	mainloop()
+	return 
 
 if os.path.isfile(sys.argv[1]):
 	binding(sys.argv[1])
