@@ -39,14 +39,12 @@ def train(model, data, num_epochs, batch_size, val_batch_size, learning_rate,
   train_op = model.training(loss_op, learning_rate)
   eval_correct = model.evaluation(logits, y_placeholder)
 
-  # summary = tf.summary.merge_all()
 
   init = tf.global_variables_initializer()
 
   saver = tf.train.Saver()
 
   with tf.Session() as sess:
-    # summary_writer = tf.summary.FileWriter(os.path.dirname(save_path), sess.graph)
 
     sess.run(init)
     step = 0
@@ -92,11 +90,6 @@ def train(model, data, num_epochs, batch_size, val_batch_size, learning_rate,
         train_op = model.training(loss_op, learning_rate)
         print('New learning rate:', learning_rate)
 
-        # Output summary
-        # summary_str = sess.run(summary, feed_dict={ X_placeholder: X_batch,
-        #                                             y_placeholder: y_batch })
-        # summary_writer.add_summary(summary_str, epoch)
-        # summary_writer.flush()
 
       # Save the model
       if not os.path.exists(os.path.dirname(save_path)):
