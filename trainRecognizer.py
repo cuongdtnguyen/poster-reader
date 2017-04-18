@@ -22,8 +22,8 @@ tf.app.flags.DEFINE_float('reg', 0.00, 'Regularization')
 tf.app.flags.DEFINE_string('save_path', 'recognizerModel/recognizerModel.ckpt',
                            'Path to file that this model will be saved to')
 
-# CHARACTER_CODES = range(ord('0'),ord('9')+1) + range(ord('A'),ord('Z')+1) + range(ord('a'),ord('z')+1)
-CHARACTER_CODES = range(ord('0'),ord('9')+1) + range(ord('a'),ord('z')+1)
+CHARACTER_CODES = range(ord('0'),ord('9')+1) + range(ord('A'),ord('Z')+1) + range(ord('a'),ord('z')+1)
+# CHARACTER_CODES = range(ord('0'),ord('9')+1) + range(ord('a'),ord('z')+1)
 
 def uncapitalize(a):
   return map(lambda c : ord(chr(c).lower()), a)

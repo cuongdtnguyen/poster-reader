@@ -19,7 +19,7 @@ def to_one_hot(y, num_label):
   """Converts a one-dimensional label array to a two-dimensional one-hot array"""
   return np.eye(num_label)[y]
 
-def load_image(path, preprocess=False, normalize=None):
+def load_character_image(path, preprocess=False, normalize=None):
   """Loads an image from the disk
 
   After loaded from the disk, the 3-channel image is flattened to a grayscale
@@ -77,9 +77,9 @@ class ImageDataset:
     if from_pickle:
       self.unpickle(location_prefix)
     else:
-      self._load_images(location_prefix)
+      self._load_character_images(location_prefix)
 
-  def _load_images(self, prefix):
+  def _load_character_images(self, prefix):
     train_label_path  = os.path.join(prefix, 'trainLabels.csv')
     test_label_path   = os.path.join(prefix, 'testLabels.csv')
 
@@ -95,7 +95,7 @@ class ImageDataset:
     all_X_train = []
     for i in xrange(1, N_all_train + 1):
       img_path = os.path.join(prefix, 'train', str(i) + '.png')
-      I = load_image(img_path)
+      I = load_character_image(img_path)
       all_X_train.append(I.ravel())
     print('Finished loading train set')
 
@@ -107,7 +107,7 @@ class ImageDataset:
     X_test = []
     for i in xrange(1, N_test + 1):
       img_path = os.path.join(prefix, 'test', str(i) + '.png')
-      I = load_image(img_path)
+      I = load_character_image(img_path)
       X_test.append(I.ravel())
     print('Finished loading test set')
 

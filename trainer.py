@@ -87,7 +87,7 @@ def train(model, data, num_epochs, batch_size, val_batch_size, learning_rate,
       print('Epoch %d/%d. Validation accuracy: %f' % (
         epoch + 1, num_epochs, val_acc))
 
-      if (val_acc - old_val_acc) / val_acc < VAL_THRES:
+      if abs(val_acc - old_val_acc) / val_acc < VAL_THRES:
         learning_rate = 0.1 * learning_rate
         train_op = model.training(loss_op, learning_rate)
         print('New learning rate:', learning_rate)

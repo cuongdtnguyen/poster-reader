@@ -15,10 +15,17 @@ from data_utils import *
 
 IMAGE_SIZE = 32 * 32
 
+def preprocess(X, norm_path):
+  with open(norm_path, 'rb') as f:
+    mean, std = pickle.load(f)
+
+  X = X.reshape(IMAGE_SIZE)
+  X = (X - mean) / std
+  return X
+
 class Predictor:
 
   def __init__(self, model, ckpt_path):
-    print("Creating predictor")
     tf.reset_default_graph()
     self.sess = tf.Session()
     self.X_placeholder = tf.placeholder(tf.float32, shape=(None, IMAGE_SIZE))
@@ -30,9 +37,13 @@ class Predictor:
     saver = tf.train.Saver()
     saver.restore(self.sess, ckpt_path)
 
-  def predict(self, X):
-    score = self.sess.run(self.softmax, feed_dict={ self.X_placeholder: X,
-                                                    self.keep_prob: 1.0 })
+  def predict(self, X, as_prob=True):
+    if as_prob:
+      score = self.sess.run(self.softmax, feed_dict={ self.X_placeholder: X,
+                                                      self.keep_prob: 1.0 })
+    else:
+      score = self.sess.run(self.logits, feed_dict={ self.X_placeholder: X,
+                                                     self.keep_prob: 1.0 })
     return score
 
   def close(self):
@@ -40,11 +51,7 @@ class Predictor:
 
 
 def predictDetector(X):
-  with open('detectorModel/normalization.pickle', 'rb') as f:
-    mean, std = pickle.load(f)
-
-  X = X.reshape((-1, IMAGE_SIZE))
-  X = (X - mean) / std
+  X = preprocess(X, 'detectorModel/normalization.pickle')
 
   # model = FullyConnectedNet(IMAGE_SIZE, [100, 100], 2)
   model = ConvNet((32, 32), 2)
@@ -56,11 +63,7 @@ def predictDetector(X):
 
 
 def predictRecognizer(X):
-  with open('recognizerModel/normalization.pickle', 'rb') as f:
-    mean, std = pickle.load(f)
-
-  X = X.reshape((-1, IMAGE_SIZE))
-  X = (X - mean) / std
+  X = preprocess(X, 'recognizerModel/normalization.pickle')
 
   # model = FullyConnectedNet(IMAGE_SIZE, [100, 100], len(CHARACTER_CODES))
   model = ConvNet((32, 32), len(CHARACTER_CODES))
@@ -72,14 +75,14 @@ def predictRecognizer(X):
 
 def main():
   for i in range(1, 11):
-    I = load_image('examples/c%d.png' % (i), preprocess=True).reshape((1, -1))
+    I = load_character_image('examples/c%d.png' % (i), preprocess=True).reshape((1, -1))
     # print(predictDetector(I))
     score = predictRecognizer(I)
     idx = np.argsort(score, axis=1)[0, -1:-6:-1]
     for t in idx:
       print('%s: %f'%(chr(CHARACTER_CODES[t]), score[0, t]))
     print()
-  # I = load_image('examples/E.png', preprocess=True)
+  # I = load_character_image('examples/E.png', preprocess=True)
   # score = predictRecognizer(I)
   # idx = np.argsort(score, axis=1)[0, -1:-6:-1]
   # for t in idx:
