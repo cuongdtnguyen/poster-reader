@@ -5,7 +5,10 @@ from __future__ import print_function
 import numpy as np
 import tensorflow as tf
 import scipy.misc
-import matplotlib.pyplot as plt
+#import matplotlib.pyplot as plt
+import matplotlib
+matplotlib.use("TkAgg")
+from matplotlib import pyplot as plt
 from matplotlib import gridspec
 from classifiers import *
 from predict import Predictor, preprocess
@@ -145,7 +148,7 @@ def recognize(imgs, lexicon, show_graph_first_one=False, verbose=False):
 
 
 if __name__=='__main__':
-  img_paths = ['examples/research.png',
+  img_paths = ['examples/research.png', 
                'examples/valuable.jpg',
                'examples/prototype.jpg',
                'examples/maintenance.jpg',
