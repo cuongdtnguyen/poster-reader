@@ -19,9 +19,9 @@ rec=0
 mainCanvas = Canvas(master,width=600,height=600)
 album=[]
 counter=0
-lexicon = ['valuable', 'graduate', 'bioengineering', 'Research','Reach', 'Researches', 'Reassure', 'research', 'Good', 'butler',
-			'BUTLER', 'Butler', 'Celebrating', 'celebrating', 'maintenance',
-			'prototype', 'PROTOTYPE', 'SUGARSWEET', 'WHO']
+with open('lexicon.txt') as lex_file:
+	lexicon = [line.rstrip('\n') for line in lex_file]
+
 def motion(event):
 	global box,startx, starty
 	box[0],box[1]=event.x, event.y
@@ -57,7 +57,7 @@ def keyDown(event):
 		try:
 			cropImg = photo.crop(rect)
 			if cropImg.size[0]==0 and cropImg.size[1]==0:
-				raise SystemError("Nothing to crop")
+				raise SystemError("Nothing to calculate")
 			# cropImg.save(str(boxes.index(b))+".jpg")
 
 			val = numpy.asarray(cropImg.convert('L'))
@@ -68,7 +68,6 @@ def keyDown(event):
 			pass
 	result1 = recognize(album, lexicon,show_graph_first_one=False, verbose=True)
 	print(result1)
-			
 
 def binding(filename):
 	global photo
