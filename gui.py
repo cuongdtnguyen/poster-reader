@@ -31,9 +31,8 @@ restart = False
 
 album=[]
 
-lexicon = ['valuable', 'graduate', 'bioengineering', 'Research', 'Reassure', 'research', 'Good', 'butler',
-			'BUTLER', 'Butler', 'Celebrating', 'celebrating', 'maintenance', 'innovation', 'participate', 'annual',
-			'prototype', 'PROTOTYPE', 'WHO', 'student', 'WPI']
+with open('lexicon.txt') as lex_file:
+ 	lexicon = [line.rstrip('\n') for line in lex_file]
 
 def mousePressed(event):
 	global box, startx, starty, restart, drawn_items
