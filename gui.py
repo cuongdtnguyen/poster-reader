@@ -14,7 +14,7 @@ import os
 import numpy
 from word import recognize
 
-BOX_LIMIT = 20
+BOX_LIMIT = 1
 REC_OPTIONS = {'outline': 'red', 'width': 3}
 
 
