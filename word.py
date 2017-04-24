@@ -113,13 +113,13 @@ def recognize(imgs, lexicon, show_graph_first_one=False, verbose=False):
 
     reduced_score = recognize_scores[i][conf_margin > 0]
 
-    print(map(lambda x: chr(CHARACTER_CODES[x]), np.argmax(reduced_score, axis=1)))
+    # print(map(lambda x: chr(CHARACTER_CODES[x]), np.argmax(reduced_score, axis=1)))
 
     selected = None
     max_score = 0
     for word in lexicon:
       score = word_score(word, reduced_score)
-      print(word, score)
+      # print(word, score)
       if score > max_score:
         max_score = score
         selected = word
@@ -148,7 +148,7 @@ def recognize(imgs, lexicon, show_graph_first_one=False, verbose=False):
 
 
 if __name__=='__main__':
-  img_paths = ['examples/research.png', 
+  img_paths = ['examples/research.png',
                'examples/valuable.jpg',
                'examples/prototype.jpg',
                'examples/maintenance.jpg',
