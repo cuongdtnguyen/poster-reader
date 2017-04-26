@@ -114,7 +114,12 @@ def keyDown(event):
 def binding(filename):
 	global photo
 	photo = Image.open(filename)
+	#resizing
+	photo = photo.resize((600,600),Image.ANTIALIAS)
+	#rotate if needed
+	#photo = photo.rotate(degrees)
 	img = ImageTk.PhotoImage(photo)
+
 
 	canvas.config(width=photo.size[0],height=photo.size[1])
 	canvas.create_image(0, 0, image=img, anchor='nw')
