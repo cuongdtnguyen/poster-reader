@@ -11,7 +11,7 @@ from trainer import *
 
 FLAGS = tf.app.flags.FLAGS
 
-tf.app.flags.DEFINE_integer('num_epochs', 50, 'Number of epoch')
+tf.app.flags.DEFINE_integer('num_epochs', 10, 'Number of epoch')
 tf.app.flags.DEFINE_integer('batch_size', 100, 'Batch size')
 tf.app.flags.DEFINE_integer('val_batch_size', 500, 'Batch size for validation')
 tf.app.flags.DEFINE_boolean('verbose', True, 'Verbose')
@@ -21,9 +21,10 @@ tf.app.flags.DEFINE_integer('log_freq', 5,
 tf.app.flags.DEFINE_float('reg', 0.00, 'Regularization')
 tf.app.flags.DEFINE_string('save_path', 'recognizerModel/recognizerModel.ckpt',
                            'Path to file that this model will be saved to')
+tf.app.flags.DEFINE_integer('model', 1, 'Model to train with (0: fully-connected, 1: convnet1, 2: convnet2, 3: convnet3)')
 
-CHARACTER_CODES = range(ord('0'),ord('9')+1) + range(ord('A'),ord('Z')+1) + range(ord('a'),ord('z')+1)
-# CHARACTER_CODES = range(ord('0'),ord('9')+1) + range(ord('a'),ord('z')+1)
+# CHARACTER_CODES = range(ord('0'),ord('9')+1) + range(ord('A'),ord('Z')+1) + range(ord('a'),ord('z')+1)
+CHARACTER_CODES = range(ord('0'),ord('9')+1) + range(ord('a'),ord('z')+1)
 
 def uncapitalize(a):
   return map(lambda c : ord(chr(c).lower()), a)
@@ -49,13 +50,13 @@ def main(argv=None):
   data.y_val = to_one_hot(data.y_val, num_label)
   data.y_test = to_one_hot(data.y_test, num_label)
 
-  # model = FullyConnectedNet(data.X_train.shape[1],
-  #                           [100, 100, 100],
-  #                           data.y_train.shape[1],
-  #                           reg=FLAGS.reg)
+  models = [FullyConnectedNet(data.X_train.shape[1], [100, 100],
+                              data.y_train.shape[1], reg=FLAGS.reg),
+            ConvNet((32, 32), len(CHARACTER_CODES)),
+            ConvNet2((32, 32), len(CHARACTER_CODES)),
+            ConvNet3((32, 32), len(CHARACTER_CODES), reg=FLAGS.reg)]
 
-  #model = ConvNet((32, 32), len(CHARACTER_CODES))
-  model = ConvNet2((32, 32), len(CHARACTER_CODES))
+  model = models[FLAGS.model]
   train(model, data,
     num_epochs=FLAGS.num_epochs,
     batch_size=FLAGS.batch_size,

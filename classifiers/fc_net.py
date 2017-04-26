@@ -9,14 +9,14 @@ from .model import Model
 class FullyConnectedNet(Model):
 
   def __init__(self, input_dims, hidden_dims, num_classes,
-               reg=0.00, weight_scale=1e-3):
+               reg=-1, weight_scale=1e-3):
     self.input_dims = input_dims
     self.hidden_dims = hidden_dims
     self.num_classes = num_classes
     self.reg = reg
     self.weight_scale = weight_scale
 
-  def inference(self, input_data):
+  def inference(self, input_data, **kwargs):
     num_layers = len(self.hidden_dims) + 1
 
     # Fisrt hidden layer
@@ -57,25 +57,29 @@ class FullyConnectedNet(Model):
 
       l2_reg  = l2_reg + tf.nn.l2_loss(weights)
 
-    return logits, l2_reg
+    if self.reg <= 0:
+      return logits, None
+    else:
+      return logits, l2_reg
 
-  def loss(self, logits, labels, l2_reg=None):
+  def loss(self, logits, labels, **kwargs):
     cross_entropy = tf.nn.softmax_cross_entropy_with_logits(
       labels=labels, logits=logits, name='xentropy')
 
-    if l2_reg is not None:
+    l2_reg = kwargs.get('l2_reg', None)
+    if l2_reg is not None and self.reg >= 0:
       return tf.reduce_mean(cross_entropy + self.reg * l2_reg,
                             name='xentropy_mean_reg')
     else:
       return tf.reduce_mean(cross_entropy, name='xentropy_mean')
 
-  def training(self, loss, learning_rate):
+  def training(self, loss, learning_rate, **kwargs):
     tf.summary.scalar('loss', loss)
     optimizer = tf.train.AdagradOptimizer(learning_rate)
     train_op = optimizer.minimize(loss)
     return train_op
 
-  def evaluation(self, logits, labels):
+  def evaluation(self, logits, labels, **kwargs):
     correct = tf.equal(tf.argmax(logits, axis=1), tf.argmax(labels, axis=1))
     return tf.reduce_mean(tf.cast(correct, tf.float32), name='evaluation')
 

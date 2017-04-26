@@ -27,9 +27,9 @@ class ConvNet2(Model):
     self.image_size = image_size
     self.num_classes = num_classes
 
-  def inference(self, input_data, keep_prob):
+  def inference(self, input_data, **kwargs):
     H, W = self.image_size
-
+    keep_prob = kwargs['keep_prob']
     x_image = tf.reshape(input_data, [-1, H, W, 1])
 
     # N x 32 x 32 x 32
@@ -71,18 +71,18 @@ class ConvNet2(Model):
 
     y_conv = tf.matmul(h_fc1_drop, W_fc2) + b_fc2
 
-    return y_conv
+    return y_conv, None
 
-  def loss(self, logits, labels):
+  def loss(self, logits, labels, **kwargs):
     loss = tf.reduce_mean(
       tf.nn.softmax_cross_entropy_with_logits(labels=labels, logits=logits))
     return loss
 
-  def training(self, loss, learning_rate):
+  def training(self, loss, learning_rate, **kwargs):
     optimizer = tf.train.AdamOptimizer(learning_rate)
     train_step = optimizer.minimize(loss)
     return train_step
 
-  def evaluation(self, logits, labels):
+  def evaluation(self, logits, labels, **kwargs):
     correct = tf.equal(tf.argmax(logits, axis=1), tf.argmax(labels, axis=1))
     return tf.reduce_mean(tf.cast(correct, tf.float32))

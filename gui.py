@@ -14,8 +14,10 @@ import os
 import numpy
 from word import recognize
 
+FRONT_COLOR = 'white'
+BACK_COLOR = 'red'
 BOX_LIMIT = 1
-REC_OPTIONS = {'outline': 'red', 'width': 3}
+REC_OPTIONS = {'outline': BACK_COLOR, 'width': 3}
 
 
 master = Tk()
@@ -94,11 +96,11 @@ def keyDown(event):
 		txt = canvas.create_text((lower_x + 5, lower_y),
 																 text=result[i][0],
 																 anchor='nw',
-																 fill='white',
+																 fill=FRONT_COLOR,
 																 font=('arial', 25))
 		bbox = canvas.bbox(txt)
 		bbox_rec = canvas.create_rectangle(lower_x, lower_y, bbox[2] + 5, bbox[3] + 5,
-																			 fill='red', **REC_OPTIONS)
+																			 fill=BACK_COLOR, **REC_OPTIONS)
 		canvas.tag_raise(txt)
 		drawn_items.append(txt)
 		drawn_items.append(bbox_rec)

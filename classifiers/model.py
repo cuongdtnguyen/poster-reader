@@ -19,14 +19,14 @@ class Model(object):
               accuracy of the current model
   """
 
-  def inference(self, input_data):
+  def inference(self, input_data, **kwargs):
     raise NotImplementedError
 
-  def loss(self, logits, labels):
+  def loss(self, logits, labels, **kwargs):
     raise NotImplementedError
 
-  def training(self, loss, learning_rate):
+  def training(self, loss, learning_rate, **kwargs):
     raise NotImplementedError
 
-  def evaluation(self, logits, labels):
+  def evaluation(self, logits, labels, **kwargs):
     raise NotImplementedError

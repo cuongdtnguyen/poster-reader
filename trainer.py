@@ -32,10 +32,8 @@ def train(model, data, num_epochs, batch_size, val_batch_size, learning_rate,
   keep_prob     = tf.placeholder(tf.float32)
 
   # Build up computational graph
-  # logits, l2_reg = model.inference(X_placeholder)
-  logits = model.inference(X_placeholder, keep_prob)
-  # loss_op  = model.loss(logits, y_placeholder, l2_reg)
-  loss_op = model.loss(logits, y_placeholder)
+  logits, l2_reg = model.inference(X_placeholder, keep_prob=keep_prob)
+  loss_op = model.loss(logits, y_placeholder, l2_reg=l2_reg)
   train_op = model.training(loss_op, learning_rate)
   eval_correct = model.evaluation(logits, y_placeholder)
 
@@ -44,6 +42,7 @@ def train(model, data, num_epochs, batch_size, val_batch_size, learning_rate,
 
   saver = tf.train.Saver()
 
+  print('Finished initializing model', model.__class__.__name__)
   with tf.Session() as sess:
 
     sess.run(init)

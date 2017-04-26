@@ -12,14 +12,18 @@ from trainer import *
 
 FLAGS = tf.app.flags.FLAGS
 
-tf.app.flags.DEFINE_integer('num_epochs', 50, 'Number of epoch')
+tf.app.flags.DEFINE_integer('num_epochs', 10, 'Number of epoch')
 tf.app.flags.DEFINE_integer('batch_size', 100, 'Batch size')
 tf.app.flags.DEFINE_integer('val_batch_size', 500, 'Batch size for validation')
 tf.app.flags.DEFINE_boolean('verbose', True, 'Verbose')
 tf.app.flags.DEFINE_float('lr', 0.05, 'Learning rate')
 tf.app.flags.DEFINE_integer('log_freq', 5, 'Log frequency every number of epochs')
-tf.app.flags.DEFINE_float('reg', 0.00, 'Regularization')
-tf.app.flags.DEFINE_string('save_path', 'detectorModel/detectorModel.ckpt', 'Path to file that this model will be saved to')
+tf.app.flags.DEFINE_float('reg', 0.0, 'Regularization')
+tf.app.flags.DEFINE_string('save_path', 'detectorModel/detectorModel.ckpt',
+                           'Path to file that this model will be saved to')
+tf.app.flags.DEFINE_integer('model', 1, 'Model to train with (0: fully-connected, 1: convnet1, 2: convnet2, 3: convnet3)')
+
+
 
 def main(argv=None):
   data = ImageDataset('dataset/detectorData')
@@ -39,12 +43,13 @@ def main(argv=None):
   data.y_val = to_one_hot(data.y_val, num_label)
   data.y_test = to_one_hot(data.y_test, num_label)
 
-  # model = FullyConnectedNet(data.X_train.shape[1],
-  #                           [100, 100],
-  #                           data.y_train.shape[1],
-  #                           reg=FLAGS.reg)
+  models = [FullyConnectedNet(data.X_train.shape[1], [100, 100],
+                              data.y_train.shape[1], reg=FLAGS.reg),
+            ConvNet((32, 32), 2),
+            ConvNet2((32, 32), 2),
+            ConvNet3((32, 32), 2, reg=FLAGS.reg)]
 
-  model = ConvNet((32, 32), 2)
+  model = models[FLAGS.model]
 
   train(model, data,
     num_epochs=FLAGS.num_epochs,
