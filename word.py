@@ -10,8 +10,13 @@ matplotlib.use("TkAgg")
 from matplotlib import pyplot as plt
 from matplotlib import gridspec
 from classifiers import *
-from predict import Predictor, preprocess
+from predict import Predictor
 from trainRecognizer import CHARACTER_CODES
+
+try:
+  import cPickle as pickle
+except:
+  import pickle
 
 DETECTOR_MODEL_DIR = 'selectedModels/detectorModel'
 RECOGNIZER_MODEL_DIR = 'selectedModels/recognizerModel'
@@ -19,9 +24,19 @@ DETECTOR_MODEL = DETECTOR_MODEL_DIR + '/detectorModel.ckpt-2048'
 RECOGNIZER_MODEL = RECOGNIZER_MODEL_DIR + '/recognizerModel.ckpt-6510'
 DETECTOR_NORM = DETECTOR_MODEL_DIR + '/normalization.pickle'
 RECOGNIZER_NORM = RECOGNIZER_MODEL_DIR + '/normalization.pickle'
-WINDOW_SIZE_RATIO = 0.7
+WINDOW_SIZE_RATIO = 0.75
 NMS_WIDTH = 2
 SLIDING_STEP = 1
+IMAGE_SIZE = 32 * 32
+
+def preprocess(X, norm_path):
+  with open(norm_path, 'rb') as f:
+    mean, std = pickle.load(f)
+
+  X = X.reshape(IMAGE_SIZE)
+  X = (X - mean) / std
+  return X
+
 
 def nms(signal, w):
   new_signal = np.zeros_like(signal)
@@ -33,7 +48,7 @@ def nms(signal, w):
   return new_signal
 
 
-def slide_window(imgs, model, model_path, normalization_path, as_prob):
+def slide_window(imgs, model, model_path, num_classes, normalization_path, as_prob):
   scores = []
   for img in imgs:
     H, W = img.shape
@@ -47,7 +62,7 @@ def slide_window(imgs, model, model_path, normalization_path, as_prob):
       windows.append(window)
 
     if len(windows) > 0:
-      predictor = Predictor(model, model_path)
+      predictor = Predictor(model, model_path, num_classes)
       scores.append(predictor.predict(windows, as_prob=as_prob))
       predictor.close()
 
@@ -66,7 +81,9 @@ def word_score(word, reg_map):
   score[:, 0] = likelihood[:, 0]
   for j in range(1, score.shape[1]):
     for i in range(j, score.shape[0]):
-      score[i, j] = max(score[i - 1, j], score[i - 1, j - 1] + likelihood[i, j])
+      score[i, j] = max(score[i - 1, j],
+                        score[i - 1, j - 1] + likelihood[i, j]
+                                            + likelihood[i-1,j])
 
   return score[-1, -1]
 
@@ -76,6 +93,7 @@ def segment(imgs):
   scores = slide_window(imgs, model,
                        model_path=DETECTOR_MODEL,
                        normalization_path=DETECTOR_NORM,
+                       num_classes=2,
                        as_prob=True)
 
   return scores
@@ -93,6 +111,7 @@ def recognize(imgs, lexicon, show_graph_first_one=False, verbose=False):
   recognize_scores = slide_window(imgs, model,
                                  model_path=RECOGNIZER_MODEL,
                                  normalization_path=RECOGNIZER_NORM,
+                                 num_classes=len(CHARACTER_CODES),
                                  as_prob=True)
 
   def margin(v):
@@ -111,13 +130,16 @@ def recognize(imgs, lexicon, show_graph_first_one=False, verbose=False):
 
     reduced_score = recognize_scores[i][conf_margin > 0]
 
-    # print(map(lambda x: chr(CHARACTER_CODES[x]), np.argmax(reduced_score, axis=1)))
+    if reduced_score.shape[0] == 0:
+      results.append(("", -1))
+      continue
+    print(map(lambda x: chr(CHARACTER_CODES[x]), np.argmax(reduced_score, axis=1)))
 
     selected = None
     max_score = 0
     for word in lexicon:
       score = word_score(word, reduced_score)
-      # print(word, score)
+      print(word, score)
       if score > max_score:
         max_score = score
         selected = word

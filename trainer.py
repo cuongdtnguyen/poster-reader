@@ -37,7 +37,6 @@ def train(model, data, num_epochs, batch_size, val_batch_size, learning_rate,
   train_op = model.training(loss_op, learning_rate)
   eval_correct = model.evaluation(logits, y_placeholder)
 
-
   init = tf.global_variables_initializer()
 
   saver = tf.train.Saver()

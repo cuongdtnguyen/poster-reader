@@ -12,22 +12,23 @@ from PIL import ImageTk, Image
 import sys
 import os
 import numpy
-from word import recognize
+from word import recognize, WINDOW_SIZE_RATIO
 
 FRONT_COLOR = 'white'
 BACK_COLOR = 'red'
 BOX_LIMIT = 1
+WINDOW_WIDTH = 600
 REC_OPTIONS = {'outline': BACK_COLOR, 'width': 3}
 
 
 master = Tk()
-canvas = Canvas(master, width=600, height=600)
+canvas = Canvas(master, cursor='cross')
 
 box = [0, 0, 0, 0]
 boxes=[]
 
 startx, starty = 0, 0
-preview_rec = 0
+preview_recs = []
 drawn_items = []
 restart = False
 
@@ -36,11 +37,14 @@ album=[]
 with open('lexicon.txt') as lex_file:
  	lexicon = [line.rstrip('\n').lower() for line in lex_file]
 
+def clear_items(item_list):
+	for item in item_list:
+		canvas.delete(item)
+
 def mousePressed(event):
 	global box, startx, starty, restart, drawn_items
 	if restart:
-		for item in drawn_items:
-			canvas.delete(item)
+		clear_items(drawn_items)
 		drawn_items = []
 		restart = False
 
@@ -50,15 +54,21 @@ def mousePressed(event):
 
 
 def mouseMoved(event):
-	global box, boxes, preview_rec
-	canvas.delete(preview_rec)
-	preview_rec = canvas.create_rectangle(startx, starty, event.x, event.y,
-																					  **REC_OPTIONS)
+	global box, boxes, preview_recs
+	clear_items(preview_recs)
+	preview1 = canvas.create_rectangle(startx, starty, event.x, event.y,
+																		 **REC_OPTIONS)
+	left_x = min(startx, event.x)
+	height = abs(starty - event.y)
+	left_x_off = left_x + int(height * WINDOW_SIZE_RATIO)
+	preview2 = canvas.create_rectangle(left_x, starty, left_x_off, event.y)
+	preview_recs.append(preview1)
+	preview_recs.append(preview2)
 
 
 def mouseReleased(event):
-	global box, boxes, preview_rec, drawn_items
-	canvas.delete(preview_rec)
+	global box, boxes, preview_recs, drawn_items
+	clear_items(preview_recs)
 	box[2], box[3] = event.x, event.y
 	if abs(box[2] - box[0]) > BOX_LIMIT and abs(box[3] - box[1]) > BOX_LIMIT:
 		boxes.append(box)
@@ -115,19 +125,18 @@ def binding(filename):
 	global photo
 	photo = Image.open(filename)
 	#resizing
-	photo = photo.resize((600,600),Image.ANTIALIAS)
-	#rotate if needed
-	#photo = photo.rotate(degrees)
+	ratio = photo.size[1] / photo.size[0]
+	photo = photo.resize((WINDOW_WIDTH, int(WINDOW_WIDTH * ratio)),Image.ANTIALIAS)
+
 	img = ImageTk.PhotoImage(photo)
 
-
-	canvas.config(width=photo.size[0],height=photo.size[1])
+	canvas.config(width=img.width(), height=img.height())
 	canvas.create_image(0, 0, image=img, anchor='nw')
 	canvas.bind('<Button-1>', mousePressed)
 	canvas.bind('<Button1-Motion>', mouseMoved)
 	canvas.bind('<ButtonRelease-1>', mouseReleased)
 	master.bind('<Key>',keyDown)
-	master.image = img
+	canvas.image = img
 	canvas.pack()
 
 

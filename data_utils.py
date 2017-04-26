@@ -70,39 +70,40 @@ class ImageDataset:
     std_train: standard deviation of the training set
 
   """
-  def __init__(self, location_prefix, train_val_ratio=0.85, from_pickle=False):
-    self.mean_train = None
-    self.std_train  = None
-    self.train_val_ratio = train_val_ratio
-    if from_pickle:
-      self.unpickle(location_prefix)
-    else:
-      self._load_character_images(location_prefix)
+  def __init__(self, location_prefix, **kwargs):
+    self.mean_train = kwargs.get('mean_train', 0)
+    self.std_train  = kwargs.get('std_train', 1)
+    self.test_only = kwargs.get('test_only', False)
+    self.train_val_ratio = kwargs.get('train_val_ratio', 0.85)
+    self._load_character_images(location_prefix)
 
   def _load_character_images(self, prefix):
-    train_label_path  = os.path.join(prefix, 'trainLabels.csv')
-    test_label_path   = os.path.join(prefix, 'testLabels.csv')
+    if not self.test_only:
+      train_label_path  = os.path.join(prefix, 'trainLabels.csv')
 
-    self.all_y_train = np.genfromtxt(train_label_path, delimiter=',', usecols=1,
-                                     dtype=np.int32)
+      self.all_y_train = np.genfromtxt(train_label_path, delimiter=',', usecols=1,
+                                       dtype=np.int32)
+
+      N_all_train = self.all_y_train.shape[0]
+      print('Loading train set...')
+      all_X_train = []
+      for i in xrange(1, N_all_train + 1):
+        img_path = os.path.join(prefix, 'train', str(i) + '.png')
+        I = load_character_image(img_path)
+        all_X_train.append(I.ravel())
+      print('Finished loading train set')
+
+      self.all_X_train = np.array(all_X_train)
+
+      self._split_train_val()
+
+      self.X_train = self.normalize(self.X_train)
+      self.X_val   = self.normalize(self.X_val)
+
+    test_label_path   = os.path.join(prefix, 'testLabels.csv')
     self.y_test  = np.genfromtxt(test_label_path, delimiter=',', usecols=1,
                                  dtype=np.int32)
-
-    N_all_train = self.all_y_train.shape[0]
     N_test  = self.y_test.shape[0]
-
-    print('Loading train set...')
-    all_X_train = []
-    for i in xrange(1, N_all_train + 1):
-      img_path = os.path.join(prefix, 'train', str(i) + '.png')
-      I = load_character_image(img_path)
-      all_X_train.append(I.ravel())
-    print('Finished loading train set')
-
-    self.all_X_train = np.array(all_X_train)
-
-    self._split_train_val()
-
     print('Loading test set...')
     X_test = []
     for i in xrange(1, N_test + 1):
@@ -112,73 +113,7 @@ class ImageDataset:
     print('Finished loading test set')
 
     self.X_test = np.array(X_test)
-
-    self.X_train = self.normalize(self.X_train)
-    self.X_val   = self.normalize(self.X_val)
     self.X_test  = self.normalize(self.X_test)
-
-  def pickle(self, prefix):
-    """Saves the loaded dataset as pickle files
-
-    Args:
-      prefix: path to the directory containing the pickle files.
-
-    """
-    with open(os.path.join(prefix, 'X_train.pickle'), 'wb') as f:
-      pickle.dump(self.all_X_train, f)
-    with open(os.path.join(prefix, 'y_train.pickle'), 'wb') as f:
-      pickle.dump(self.all_y_train, f)
-    with open(os.path.join(prefix, 'X_val.pickle'), 'wb') as f:
-      pickle.dump(self.all_X_train, f)
-    with open(os.path.join(prefix, 'y_val.pickle'), 'wb') as f:
-      pickle.dump(self.all_y_train, f)
-    with open(os.path.join(prefix, 'X_test.pickle'), 'wb') as f:
-      pickle.dump(self.X_test, f)
-    with open(os.path.join(prefix, 'y_test.pickle'), 'wb') as f:
-      pickle.dump(self.y_test, f)
-
-  def unpickle(self, prefix):
-    """Loads the dataset from pickle files
-
-    Args:
-      prefix: path to the directory containing the pickle files.
-
-    """
-    with open(os.path.join(prefix, 'X_train.pickle'), 'rb') as f:
-      self.all_X_train = pickle.load(f)
-    with open(os.path.join(prefix, 'y_train.pickle'), 'rb') as f:
-      self.all_y_train = pickle.load(f)
-    with open(os.path.join(prefix, 'X_val.pickle'), 'wb') as f:
-      pickle.dump(self.all_X_train, f)
-    with open(os.path.join(prefix, 'y_val.pickle'), 'wb') as f:
-      pickle.dump(self.all_y_train, f)
-    with open(os.path.join(prefix, 'X_test.pickle'), 'rb') as f:
-      self.X_test = pickle.load(f)
-    with open(os.path.join(prefix, 'y_test.pickle'), 'rb') as f:
-      self.y_test = pickle.load(f)
-
-    self._split_train_val()
-
-  def _split_train_val(self):
-    perm = np.arange(self.all_X_train.shape[0])
-    np.random.shuffle(perm)
-    self.all_X_train = self.all_X_train[perm]
-    self.all_y_train = self.all_y_train[perm]
-
-    train_val_split = int(self.all_y_train.shape[0] * self.train_val_ratio)
-    self.X_train = self.all_X_train[:train_val_split]
-    self.y_train = self.all_y_train[:train_val_split]
-    self.X_val   = self.all_X_train[train_val_split:]
-    self.y_val   = self.all_y_train[train_val_split:]
-
-    self.mean_train = np.mean(self.X_train, axis=0)
-    self.std_train  = np.std(self.X_train, axis=0)
-
-  def _shuffle_train(self):
-    perm = np.arange(self.X_train.shape[0])
-    np.random.shuffle(perm)
-    self.X_train = self.X_train[perm]
-    self.y_train = self.y_train[perm]
 
   def normalize(self, sample):
     if self.mean_train is not None:
@@ -208,12 +143,39 @@ class ImageDataset:
       batch_size: size of each batch
 
     """
+    if self.test_only:
+      yield
+
     self._shuffle_train()
     for start in xrange(0, self.X_train.shape[0], batch_size):
       yield ( self.X_train[start: start + batch_size],
               self.y_train[start: start + batch_size])
 
   def val_batches(self, batch_size):
+    if self.test_only:
+      yield
+
     for start in xrange(0, self.X_val.shape[0], batch_size):
       yield ( self.X_val[start: start + batch_size],
               self.y_val[start: start + batch_size])
+
+  def _split_train_val(self):
+    perm = np.arange(self.all_X_train.shape[0])
+    np.random.shuffle(perm)
+    self.all_X_train = self.all_X_train[perm]
+    self.all_y_train = self.all_y_train[perm]
+
+    train_val_split = int(self.all_y_train.shape[0] * self.train_val_ratio)
+    self.X_train = self.all_X_train[:train_val_split]
+    self.y_train = self.all_y_train[:train_val_split]
+    self.X_val   = self.all_X_train[train_val_split:]
+    self.y_val   = self.all_y_train[train_val_split:]
+
+    self.mean_train = np.mean(self.X_train, axis=0)
+    self.std_train  = np.std(self.X_train, axis=0)
+
+  def _shuffle_train(self):
+    perm = np.arange(self.X_train.shape[0])
+    np.random.shuffle(perm)
+    self.X_train = self.X_train[perm]
+    self.y_train = self.y_train[perm]
