@@ -20,8 +20,8 @@ except:
 
 DETECTOR_MODEL_DIR = 'selectedModels/detectorModel'
 RECOGNIZER_MODEL_DIR = 'selectedModels/recognizerModel'
-DETECTOR_MODEL = DETECTOR_MODEL_DIR + '/detectorModel.ckpt-2048'
-RECOGNIZER_MODEL = RECOGNIZER_MODEL_DIR + '/recognizerModel.ckpt-6510'
+DETECTOR_MODEL = DETECTOR_MODEL_DIR + '/detectorModel.ckpt-1800'
+RECOGNIZER_MODEL = RECOGNIZER_MODEL_DIR + '/recognizerModel.ckpt-3840'
 DETECTOR_NORM = DETECTOR_MODEL_DIR + '/normalization.pickle'
 RECOGNIZER_NORM = RECOGNIZER_MODEL_DIR + '/normalization.pickle'
 WINDOW_SIZE_RATIO = 0.75
@@ -89,7 +89,7 @@ def word_score(word, reg_map):
 
 
 def segment(imgs):
-  model = ConvNet((32, 32), 2)
+  model = ConvNet2((32, 32), 2)
   scores = slide_window(imgs, model,
                        model_path=DETECTOR_MODEL,
                        normalization_path=DETECTOR_NORM,

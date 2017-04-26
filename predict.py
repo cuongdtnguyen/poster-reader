@@ -21,8 +21,10 @@ from data_utils import *
 
 DETECTOR_MODEL_DIR = 'selectedModels/detectorModel'
 RECOGNIZER_MODEL_DIR = 'selectedModels/recognizerModel'
-DETECTOR_MODEL = DETECTOR_MODEL_DIR + '/detectorModel.ckpt-2048'
-RECOGNIZER_MODEL = RECOGNIZER_MODEL_DIR + '/recognizerModel.ckpt-6510'
+# DETECTOR_MODEL = DETECTOR_MODEL_DIR + '/detectorModel.ckpt-2048'
+DETECTOR_MODEL = DETECTOR_MODEL_DIR + '/detectorModel.ckpt-1800'
+#RECOGNIZER_MODEL = RECOGNIZER_MODEL_DIR + '/recognizerModel.ckpt-6510'
+RECOGNIZER_MODEL = RECOGNIZER_MODEL_DIR + '/recognizerModel.ckpt-3840'
 DETECTOR_NORM = DETECTOR_MODEL_DIR + '/normalization.pickle'
 RECOGNIZER_NORM = RECOGNIZER_MODEL_DIR + '/normalization.pickle'
 
@@ -102,7 +104,7 @@ def evaluateDetector():
   data = ImageDataset('dataset/detectorData', test_only=True,
                       mean_train=mean, std_train=std)
   data = preprocess_data_detector(data)
-  model = ConvNet((32, 32), 2)
+  model = ConvNet2((32, 32), 2)
   predictor = Predictor(model, DETECTOR_MODEL, 2)
   predicted = predictor.predict(data.X_test)
   accuracy = predictor.evaluate(data.X_test, data.y_test)
