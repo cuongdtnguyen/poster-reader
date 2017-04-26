@@ -14,6 +14,12 @@ from classifiers import *
 from data_utils import *
 
 IMAGE_SIZE = 32 * 32
+DETECTOR_MODEL_DIR = 'selectedModels/detectorModel'
+RECOGNIZER_MODEL_DIR = 'selectedModels/recognizerModel'
+DETECTOR_MODEL = DETECTOR_MODEL_DIR + '/detectorModel.ckpt-6400'
+RECOGNIZER_MODEL = RECOGNIZER_MODEL_DIR + '/recognizerModel.ckpt-3255'
+DETECTOR_NORM = DETECTOR_MODEL_DIR + '/normalization.pickle'
+RECOGNIZER_NORM = RECOGNIZER_MODEL_DIR + '/normalization.pickle'
 
 def preprocess(X, norm_path):
   with open(norm_path, 'rb') as f:
@@ -30,8 +36,7 @@ class Predictor:
     self.sess = tf.Session()
     self.X_placeholder = tf.placeholder(tf.float32, shape=(None, IMAGE_SIZE))
     self.keep_prob = tf.placeholder(tf.float32)
-    # self.logits, _ = model.inference(self.X_placeholder)
-    self.logits = model.inference(self.X_placeholder, self.keep_prob)
+    self.logits, _ = model.inference(self.X_placeholder, keep_prob=self.keep_prob)
     self.softmax = tf.nn.softmax(self.logits)
 
     saver = tf.train.Saver()

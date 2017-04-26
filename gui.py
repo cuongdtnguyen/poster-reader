@@ -34,7 +34,7 @@ restart = False
 album=[]
 
 with open('lexicon.txt') as lex_file:
- 	lexicon = [line.rstrip('\n') for line in lex_file]
+ 	lexicon = [line.rstrip('\n').lower() for line in lex_file]
 
 def mousePressed(event):
 	global box, startx, starty, restart, drawn_items
@@ -75,7 +75,8 @@ def keyDown(event):
 		return
 	for b in boxes:
 		try:
-			cropImg = photo.crop(b)
+			cropImg = photo.crop((min(b[0],b[2]),min(b[1],b[3]),
+														max(b[0],b[2]),max(b[1],b[3])))
 			if cropImg.size[0] == 0 or cropImg.size[1] == 0:
 				raise SystemError("Nothing to crop")
 

@@ -5,7 +5,6 @@ from __future__ import print_function
 import numpy as np
 import tensorflow as tf
 import scipy.misc
-#import matplotlib.pyplot as plt
 import matplotlib
 matplotlib.use("TkAgg")
 from matplotlib import pyplot as plt
@@ -17,10 +16,10 @@ from trainRecognizer import CHARACTER_CODES
 DETECTOR_MODEL_DIR = 'selectedModels/detectorModel'
 RECOGNIZER_MODEL_DIR = 'selectedModels/recognizerModel'
 DETECTOR_MODEL = DETECTOR_MODEL_DIR + '/detectorModel.ckpt-2048'
-RECOGNIZER_MODEL = RECOGNIZER_MODEL_DIR + '/recognizerModel.ckpt-3255'
+RECOGNIZER_MODEL = RECOGNIZER_MODEL_DIR + '/recognizerModel.ckpt-6510'
 DETECTOR_NORM = DETECTOR_MODEL_DIR + '/normalization.pickle'
 RECOGNIZER_NORM = RECOGNIZER_MODEL_DIR + '/normalization.pickle'
-WINDOW_SIZE_RATIO = 0.8
+WINDOW_SIZE_RATIO = 0.7
 NMS_WIDTH = 2
 SLIDING_STEP = 1
 
@@ -38,20 +37,19 @@ def slide_window(imgs, model, model_path, normalization_path, as_prob):
   scores = []
   for img in imgs:
     H, W = img.shape
-    if H > W:
-      return None
-
-    predictor = Predictor(model, model_path)
     windows = []
     step = SLIDING_STEP
-    for i in range(0, W - H + 1, step):
-      window = scipy.misc.imresize(img[:, i:i + int(H*WINDOW_SIZE_RATIO)],
+    window_width = int(H*WINDOW_SIZE_RATIO)
+    for i in range(0, W - window_width + 1, step):
+      window = scipy.misc.imresize(img[:, i:i + window_width],
                                   (32, 32), interp='bilinear')
       window = preprocess(window, normalization_path)
       windows.append(window)
 
-    scores.append(predictor.predict(windows, as_prob=as_prob))
-    predictor.close()
+    if len(windows) > 0:
+      predictor = Predictor(model, model_path)
+      scores.append(predictor.predict(windows, as_prob=as_prob))
+      predictor.close()
 
   return scores
 
@@ -74,7 +72,7 @@ def word_score(word, reg_map):
 
 
 def segment(imgs):
-  model = ConvNet2((32, 32), 2)
+  model = ConvNet((32, 32), 2)
   scores = slide_window(imgs, model,
                        model_path=DETECTOR_MODEL,
                        normalization_path=DETECTOR_NORM,
@@ -89,7 +87,7 @@ def recognize(imgs, lexicon, show_graph_first_one=False, verbose=False):
     print('Calculating detect scores...')
   detect_scores = segment(imgs)
 
-  model = ConvNet2((32, 32), len(CHARACTER_CODES))
+  model = ConvNet3((32, 32), len(CHARACTER_CODES))
   if verbose:
     print('Calculating recognize scores...')
   recognize_scores = slide_window(imgs, model,
@@ -109,7 +107,7 @@ def recognize(imgs, lexicon, show_graph_first_one=False, verbose=False):
 
     detect_mask = detect_scores[i][:, 0]
     conf_margin = np.copy(conf_margin_refined)
-    conf_margin[detect_mask <= 0.7] = 0
+    conf_margin[detect_mask <= 0.5] = 0
 
     reduced_score = recognize_scores[i][conf_margin > 0]
 
