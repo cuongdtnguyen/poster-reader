@@ -25,16 +25,15 @@ def convert_to_code(a):
   return map(lambda i : CHARACTER_CODES[i], a)
 
 def preprocess_data(data):
-  if not data.test_only:
-    data.y_train = convert_to_index(uncapitalize(data.y_train))
-    data.y_val = convert_to_index(uncapitalize(data.y_val))
   data.y_test = convert_to_index(uncapitalize(data.y_test))
 
   num_label = len(CHARACTER_CODES)
-
   if not data.test_only:
+    data.y_train = convert_to_index(uncapitalize(data.y_train))
+    data.y_val = convert_to_index(uncapitalize(data.y_val))
     data.y_train = to_one_hot(data.y_train, num_label)
     data.y_val = to_one_hot(data.y_val, num_label)
+
   data.y_test = to_one_hot(data.y_test, num_label)
 
   return data

@@ -14,16 +14,18 @@ FLAGS = tf.app.flags.FLAGS
 
 def preprocess_data(data):
   # Zero-based index for labels
+  data.y_test  -= 1
+  num_label = 2
+
   if not data.test_only:
+    # Zero-based index for labels
     data.y_train -= 1
     data.y_val   -= 1
-  data.y_test  -= 1
+    # Encode as one-hot vectors
 
-  # Encode as one-hot vectors
-  num_label = 2
-  if not data.test_only:
     data.y_train = to_one_hot(data.y_train, num_label)
     data.y_val = to_one_hot(data.y_val, num_label)
+
   data.y_test = to_one_hot(data.y_test, num_label)
   return data
 
