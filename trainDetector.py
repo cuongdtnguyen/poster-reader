@@ -22,11 +22,11 @@ tf.app.flags.DEFINE_float('reg', 0.0, 'Regularization')
 tf.app.flags.DEFINE_string('save_path', 'detectorModel/detectorModel.ckpt',
                            'Path to file that this model will be saved to')
 tf.app.flags.DEFINE_integer('model', 1, 'Model to train with (0: fully-connected, 1: convnet1, 2: convnet2, 3: convnet3)')
-
+tf.app.flags.DEFINE_float('split', 0.85, 'Train/Val split ratio')
 
 
 def main(argv=None):
-  data = ImageDataset('dataset/detectorData')
+  data = ImageDataset('dataset/detectorData', train_val_ratio=FLAGS.split)
 
   # Save normalization values so that predictor can use later
   data.save_normalize(os.path.join(os.path.dirname(FLAGS.save_path),

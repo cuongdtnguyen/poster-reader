@@ -47,7 +47,6 @@ def train(model, data, num_epochs, batch_size, val_batch_size, learning_rate,
 
     sess.run(init)
     step = 0
-    old_val_acc = 0
     if verbose:
       print('Start training...')
     for epoch in range(num_epochs):
@@ -80,15 +79,9 @@ def train(model, data, num_epochs, batch_size, val_batch_size, learning_rate,
                                 feed_dict={ X_placeholder: X_batch,
                                             y_placeholder: y_batch,
                                             keep_prob: 1.0 })
-      val_acc = sum_val_acc / num_val_batches
+      val_acc = -1 if num_val_batches == 0 else sum_val_acc / num_val_batches
       print('Epoch %d/%d. Validation accuracy: %f' % (
         epoch + 1, num_epochs, val_acc))
-
-      if abs(val_acc - old_val_acc) / val_acc < VAL_THRES:
-        learning_rate = 0.1 * learning_rate
-        train_op = model.training(loss_op, learning_rate)
-        print('New learning rate:', learning_rate)
-
 
       # Save the model
       if not os.path.exists(os.path.dirname(save_path)):

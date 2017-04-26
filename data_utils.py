@@ -13,7 +13,6 @@ import numpy as np
 import scipy.misc
 
 IMAGE_SIZE = 32
-TRAIN_VAL_RATIO = 0.85
 
 def to_one_hot(y, num_label):
   """Converts a one-dimensional label array to a two-dimensional one-hot array"""
@@ -71,9 +70,10 @@ class ImageDataset:
     std_train: standard deviation of the training set
 
   """
-  def __init__(self, location_prefix, from_pickle=False):
+  def __init__(self, location_prefix, train_val_ratio=0.85, from_pickle=False):
     self.mean_train = None
     self.std_train  = None
+    self.train_val_ratio = train_val_ratio
     if from_pickle:
       self.unpickle(location_prefix)
     else:
@@ -165,7 +165,7 @@ class ImageDataset:
     self.all_X_train = self.all_X_train[perm]
     self.all_y_train = self.all_y_train[perm]
 
-    train_val_split = int(self.all_y_train.shape[0] * TRAIN_VAL_RATIO)
+    train_val_split = int(self.all_y_train.shape[0] * self.train_val_ratio)
     self.X_train = self.all_X_train[:train_val_split]
     self.y_train = self.all_y_train[:train_val_split]
     self.X_val   = self.all_X_train[train_val_split:]
