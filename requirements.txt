@@ -1,5 +1,5 @@
 scipy==0.18.1
 tensorflow==2.5.0
-Pillow==8.1.1
+Pillow==8.2.0
 numpy==1.12.1
 numpydoc==0.6.0
